@@ -1,7 +1,10 @@
-import { Button, buttonVariants } from '@/components/ui/button';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { buttonVariants } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import ThemeToggle from '@/components/shared/ThemeToggle';
+import InscriptionAbonnementDialog from '@/components/shared/InscriptionAbonnementDialog';
 import {
   Car,
   LayoutDashboard,
@@ -27,32 +30,47 @@ const pourquoi = [
 
 const offres = [
   {
-    nom: 'Gratuit',
-    prix: '0 $',
-    periode: '/mois',
-    description: 'Pour démarrer et découvrir le back-office LocaCar.',
-    fonctionnalites: ['Tableau de bord', 'Créer des fiches clients', 'Voir l\'état des véhicules'],
-    misEnAvant: false,
-  },
-  {
-    nom: 'Pro',
+    nom: 'Standard',
     prix: '—',
     periode: '/mois',
-    description: 'Pour les agences qui gèrent réservations et personnel au quotidien.',
-    fonctionnalites: ['Tout Gratuit, plus :', 'Gestion des réservations', 'Création d\'employés', 'Rôles et permissions'],
+    description: 'Pour les agences qui gèrent réservations, véhicules et personnel au quotidien.',
+    fonctionnalites: [
+      'Tableau de bord et fiches clients',
+      'Gestion des réservations',
+      'Suivi de la flotte de véhicules',
+      'Création d\'employés et rôles',
+    ],
     misEnAvant: true,
   },
   {
-    nom: 'Entreprise',
+    nom: 'Custom',
     prix: 'Sur devis',
     periode: '',
-    description: 'Pour les réseaux multi-agences avec besoins spécifiques.',
-    fonctionnalites: ['Tout Pro, plus :', 'Multi-agences', 'Facturation détaillée', 'Support prioritaire'],
+    description: 'Pour les réseaux multi-agences avec des besoins spécifiques (quotas, support, intégrations).',
+    fonctionnalites: [
+      'Tout Standard, plus :',
+      'Multi-agences et quotas personnalisés',
+      'Facturation détaillée',
+      'Support prioritaire',
+    ],
     misEnAvant: false,
   },
 ];
 
 export default function Vitrine() {
+  const [dialogOuvert, setDialogOuvert] = useState(false);
+  const [planChoisi, setPlanChoisi] = useState('');
+
+  function choisirPlan(nom: string) {
+    setPlanChoisi(nom);
+    setDialogOuvert(true);
+  }
+
+  function scrollVersTarifs(e: React.MouseEvent) {
+    e.preventDefault();
+    document.getElementById('tarifs')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="flex items-center justify-between px-8 py-6 max-w-6xl mx-auto">
@@ -66,14 +84,15 @@ export default function Vitrine() {
       </header>
 
       {/* HERO */}
-<section className="relative overflow-hidden px-6 pt-16 pb-24 min-h-[520px] flex items-center">
-  <div
-    className="absolute inset-0 -z-10 bg-cover bg-center"
-    style={{ backgroundImage: "url('https://unsplash.com/fr/photos/une-rangee-de-voitures-garees-dans-un-parking-jzttMs1pZ70')" }}
+<section className="relative overflow-hidden px-6 pt-16 pb-24 min-h-[520px] flex items-center bg-neutral-900">
+  <img
+    src="https://images.unsplash.com/photo-1587630400690-7cf79c8b75ff?auto=format&fit=crop&w=1920&q=80"
+    alt=""
+    className="absolute inset-0 size-full object-cover"
   />
-  <div className="absolute inset-0 -z-10 bg-black/60" />
+  <div className="absolute inset-0 bg-black/55" />
 
-  <div className="text-center max-w-2xl mx-auto">
+  <div className="relative text-center max-w-2xl mx-auto">
     <Badge className="mb-4 bg-white/10 text-white border-white/20">
       Pour les agences de location
     </Badge>
@@ -95,6 +114,7 @@ export default function Vitrine() {
       </a>
       <a
         href="#tarifs"
+        onClick={scrollVersTarifs}
         className="inline-flex items-center justify-center h-10 px-4 rounded-4xl border border-white/40 text-white text-sm font-medium hover:bg-white/10 transition-colors"
       >
         Voir les tarifs
@@ -143,13 +163,13 @@ export default function Vitrine() {
       </section>
 
       {/* TARIFS */}
-      <section id="tarifs" className="px-6 py-16 max-w-5xl mx-auto scroll-mt-8">
+      <section id="tarifs" className="px-6 py-16 max-w-3xl mx-auto scroll-mt-8">
         <h3 className="text-2xl font-bold text-center mb-2">Des offres pour chaque agence</h3>
         <p className="text-muted-foreground text-center mb-10">
-          Débloquez plus de fonctionnalités quand votre agence grandit.
+          Un plan standard clé en main, ou une offre sur mesure pour vos besoins spécifiques.
         </p>
 
-        <div className="grid md:grid-cols-3 gap-6 items-start">
+        <div className="grid md:grid-cols-2 gap-6 items-start">
           {offres.map((offre) => (
             <Card
               key={offre.nom}
@@ -179,12 +199,22 @@ export default function Vitrine() {
                   ))}
                 </ul>
 
-                <a
-                  href="mailto:contact@locacar.com?subject=Demande d'accès LocaCar"
-                  className={buttonVariants({ variant: offre.misEnAvant ? 'default' : 'outline' })}
-                >
-                  {offre.nom === 'Entreprise' ? 'Nous contacter' : 'Demander un accès'}
-                </a>
+                {offre.nom === 'Custom' ? (
+                  <Link
+                    to="/sur-mesure"
+                    className={buttonVariants({ variant: 'outline' })}
+                  >
+                    Nous contacter
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => choisirPlan(offre.nom)}
+                    className={buttonVariants({ variant: 'default' })}
+                  >
+                    S'inscrire
+                  </button>
+                )}
               </CardContent>
             </Card>
           ))}
@@ -208,6 +238,12 @@ export default function Vitrine() {
       <footer className="text-center text-sm text-muted-foreground py-8 border-t">
         © {new Date().getFullYear()} LocaCar. Gestion de flotte pour agences de location.
       </footer>
+
+      <InscriptionAbonnementDialog
+        open={dialogOuvert}
+        onOpenChange={setDialogOuvert}
+        planNom={planChoisi}
+      />
     </div>
   );
 }
